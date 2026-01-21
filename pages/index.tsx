@@ -126,9 +126,6 @@ export default function Home() {
             <div className="text-xl md:text-2xl font-medium text-black mb-8 tracking-normal" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
               Design Gym
             </div>
-            <h1 className="text-3xl md:text-4xl font-light tracking-tight mb-4">
-              Design Quiz
-            </h1>
             <div className="mb-4">
               <div className="text-sm text-gray-500 mb-2">
                 Question {currentQuestionIndex + 1} of {sessionQuestions.length}
