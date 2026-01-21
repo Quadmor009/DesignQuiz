@@ -1,0 +1,20 @@
+Add a question randomization system to the quiz logic.
+
+Context:
+- There are 10 beginner questions and 10 mid-level questions stored in a quiz data file
+- Beginner sessions should present 5 random questions
+- Mid-level sessions should present 7 random questions
+- The same question should not appear twice in a single session
+- Each new session should feel different and unpredictable
+
+Implementation requirements:
+- Filter questions by level first
+- Randomize the order only once when the quiz session starts
+- Select the required number of questions per level
+- Store the randomized question set in state
+- Do not reshuffle on re-render
+- Keep the logic simple and readable
+
+Create a small helper function to shuffle questions.
+Avoid external libraries.
+Show the full updated code for the main page file and explain what changed.

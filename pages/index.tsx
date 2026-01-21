@@ -2,13 +2,65 @@ import { useState } from 'react'
 import Head from 'next/head'
 import { questions, foxQuote, Question } from '../data/quizData'
 
+// Configuration for questions per level - easy to adjust for future expansion
+const QUESTIONS_PER_LEVEL: Record<'beginner' | 'mid', number> = {
+  beginner: 5,
+  mid: 7,
+}
+
+// Helper function to shuffle an array (Fisher-Yates algorithm)
+// This ensures each session feels different and unpredictable
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+// Select and randomize questions from all levels
+// This function runs only once when the quiz session starts
+// It combines questions from each level according to QUESTIONS_PER_LEVEL config
+function getRandomizedQuestions(): Question[] {
+  const selectedQuestions: Question[] = []
+  
+  // Process each level
+  for (const level of ['beginner', 'mid'] as const) {
+    // Filter questions by level
+    const levelQuestions = questions.filter(q => q.level === level)
+    
+    // Shuffle the questions for this level
+    const shuffled = shuffleArray(levelQuestions)
+    
+    // Select the required number of questions for this level
+    const count = QUESTIONS_PER_LEVEL[level]
+    const selected = shuffled.slice(0, count)
+    
+    selectedQuestions.push(...selected)
+  }
+  
+  // Shuffle all selected questions together for a mixed order
+  const finalQuestions = shuffleArray(selectedQuestions)
+  
+  // Debug: verify we have the correct number of questions
+  console.log(`Selected ${finalQuestions.length} questions (should be 12)`)
+  
+  return finalQuestions
+}
+
 export default function Home() {
+  // Initialize randomized questions only once using function initializer
+  // This prevents reshuffling on re-render
+  // Each session will have: 5 beginner + 7 mid = 12 total questions
+  const [sessionQuestions] = useState<Question[]>(() => getRandomizedQuestions())
+  
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<'left' | 'right' | null>(null)
   const [showExplanation, setShowExplanation] = useState(false)
 
-  const currentQuestion = questions[currentQuestionIndex]
-  const isLastQuestion = currentQuestionIndex === questions.length - 1
+  const currentQuestion = sessionQuestions[currentQuestionIndex]
+  const isLastQuestion = currentQuestionIndex === sessionQuestions.length - 1
 
   const handleSelect = (side: 'left' | 'right') => {
     if (!showExplanation) {
@@ -47,7 +99,11 @@ export default function Home() {
               Design Quiz
             </h1>
             <div className="text-sm text-gray-500">
-              Question {currentQuestionIndex + 1} of {questions.length}
+              Question {currentQuestionIndex + 1} of {sessionQuestions.length}
+              {/* Debug: Remove this after confirming it works */}
+              <span className="ml-2 text-xs text-gray-400">
+                (Total in session: {sessionQuestions.length} questions)
+              </span>
             </div>
           </div>
 
@@ -58,27 +114,24 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            <div 
+            <div
               onClick={() => handleSelect('left')}
-              className={`cursor-pointer transition-all relative group ${
-                currentQuestion.type === 'font' 
-                  ? '' 
-                  : `border-2 ${
-                      selectedAnswer === 'left' 
-                        ? isCorrect 
-                          ? 'border-green-500' 
-                          : 'border-red-500'
-                        : showExplanation && currentQuestion.correctAnswer === 'left'
-                          ? 'border-green-500'
-                          : 'border-gray-200 hover:border-gray-400'
-                    }`
-              }`}
+              className={`cursor-pointer transition-all relative group ${currentQuestion.type === 'font'
+                  ? ''
+                  : `border-2 ${selectedAnswer === 'left'
+                    ? isCorrect
+                      ? 'border-green-500'
+                      : 'border-red-500'
+                    : showExplanation && currentQuestion.correctAnswer === 'left'
+                      ? 'border-green-500'
+                      : 'border-gray-200 hover:border-gray-400'
+                  }`
+                }`}
             >
               {currentQuestion.type === 'font' ? (
-                <div 
-                  className={`p-8 min-h-[300px] flex items-center justify-center bg-white transition-transform ${
-                    !showExplanation ? 'group-hover:scale-[1.02]' : ''
-                  }`}
+                <div
+                  className={`p-8 min-h-[300px] flex items-center justify-center bg-white transition-transform ${!showExplanation ? 'group-hover:scale-[1.02]' : ''
+                    }`}
                   style={{ fontFamily: currentQuestion.leftFont }}
                 >
                   <p className="text-3xl leading-relaxed text-center">
@@ -86,12 +139,11 @@ export default function Home() {
                   </p>
                 </div>
               ) : currentQuestion.leftImage ? (
-                <img 
-                  src={currentQuestion.leftImage} 
-                  alt="Design option A" 
-                  className={`w-full h-auto transition-transform ${
-                    !showExplanation ? 'group-hover:scale-[1.02]' : ''
-                  }`}
+                <img
+                  src={currentQuestion.leftImage}
+                  alt="Design option A"
+                  className={`w-full h-auto transition-transform ${!showExplanation ? 'group-hover:scale-[1.02]' : ''
+                    }`}
                 />
               ) : null}
               {!showExplanation && (
@@ -102,35 +154,31 @@ export default function Home() {
                 </div>
               )}
               {selectedAnswer === 'left' && (
-                <div className={`p-4 text-center font-medium ${
-                  isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                }`}>
+                <div className={`p-4 text-center font-medium ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                  }`}>
                   {isCorrect ? '✓ Correct' : '✗ Your choice'}
                 </div>
               )}
             </div>
 
-            <div 
+            <div
               onClick={() => handleSelect('right')}
-              className={`cursor-pointer transition-all relative group ${
-                currentQuestion.type === 'font' 
-                  ? '' 
-                  : `border-2 ${
-                      selectedAnswer === 'right' 
-                        ? isCorrect 
-                          ? 'border-green-500' 
-                          : 'border-red-500'
-                        : showExplanation && currentQuestion.correctAnswer === 'right'
-                          ? 'border-green-500'
-                          : 'border-gray-200 hover:border-gray-400'
-                    }`
-              }`}
+              className={`cursor-pointer transition-all relative group ${currentQuestion.type === 'font'
+                  ? ''
+                  : `border-2 ${selectedAnswer === 'right'
+                    ? isCorrect
+                      ? 'border-green-500'
+                      : 'border-red-500'
+                    : showExplanation && currentQuestion.correctAnswer === 'right'
+                      ? 'border-green-500'
+                      : 'border-gray-200 hover:border-gray-400'
+                  }`
+                }`}
             >
               {currentQuestion.type === 'font' ? (
-                <div 
-                  className={`p-8 min-h-[300px] flex items-center justify-center bg-white transition-transform ${
-                    !showExplanation ? 'group-hover:scale-[1.02]' : ''
-                  }`}
+                <div
+                  className={`p-8 min-h-[300px] flex items-center justify-center bg-white transition-transform ${!showExplanation ? 'group-hover:scale-[1.02]' : ''
+                    }`}
                   style={{ fontFamily: currentQuestion.rightFont }}
                 >
                   <p className="text-3xl leading-relaxed text-center">
@@ -138,12 +186,11 @@ export default function Home() {
                   </p>
                 </div>
               ) : currentQuestion.rightImage ? (
-                <img 
-                  src={currentQuestion.rightImage} 
-                  alt="Design option B" 
-                  className={`w-full h-auto transition-transform ${
-                    !showExplanation ? 'group-hover:scale-[1.02]' : ''
-                  }`}
+                <img
+                  src={currentQuestion.rightImage}
+                  alt="Design option B"
+                  className={`w-full h-auto transition-transform ${!showExplanation ? 'group-hover:scale-[1.02]' : ''
+                    }`}
                 />
               ) : null}
               {!showExplanation && (
@@ -154,9 +201,8 @@ export default function Home() {
                 </div>
               )}
               {selectedAnswer === 'right' && (
-                <div className={`p-4 text-center font-medium ${
-                  isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                }`}>
+                <div className={`p-4 text-center font-medium ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                  }`}>
                   {isCorrect ? '✓ Correct' : '✗ Your choice'}
                 </div>
               )}
