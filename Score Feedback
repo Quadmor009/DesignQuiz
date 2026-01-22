@@ -1,0 +1,26 @@
+Implement the final score display using the following structure:
+
+Display order in the final score modal:
+1. Score: {score} / {totalPossiblePoints}
+2. Accuracy: {accuracy}% accuracy
+3. Feedback: {getFeedback(accuracy)}
+
+Scoring details:
+- Accuracy is calculated as (score / totalPossiblePoints) * 100
+- Accuracy should be rounded to the nearest whole number
+
+Feedback logic:
+- If accuracy is 80% or higher → return "Strong"
+- If accuracy is between 50% and 79% → return "Solid"
+- If accuracy is below 50% → return "Needs practice"
+
+Constraints:
+- Feedback must be neutral and encouraging
+- No emojis
+- No animations
+
+Technical requirements:
+- Implement getFeedback as a simple helper function
+- Keep logic readable and easy to adjust later
+- Show the full updated code for the score display
+- Explain only what changed

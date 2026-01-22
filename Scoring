@@ -1,0 +1,31 @@
+Add a scoring system to the Design Gym quiz.
+
+Scoring rules:
+- Each correct answer = 100 points
+- No partial credit
+- No negative scoring
+
+Session rules:
+- Beginner sessions have 5 questions (max 500 points)
+- Mid-level sessions have 7 questions (max 700 points)
+
+Behavior:
+- Do not show score during the quiz
+- Track score silently as the user progresses
+- Show final score only after the last question
+
+Score display:
+- Show score as “X / total”
+- Show accuracy percentage
+- Keep the presentation calm and minimal
+- No animations, confetti, or gamification
+
+Optional:
+- Add a simple qualitative feedback line based on accuracy
+  (e.g. strong / solid / needs practice)
+
+Technical requirements:
+- Keep scoring logic simple and readable
+- Use React state only
+- Show full updated code for the main page component
+- Explain only what changed and why

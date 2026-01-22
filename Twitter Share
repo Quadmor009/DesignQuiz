@@ -1,0 +1,17 @@
+Add a "Share on Twitter" button to the final score modal.
+
+When clicked:
+- Open a new window using Twitter's intent/tweet URL
+- Pre-fill the tweet text with:
+  "Just trained my design instincts at Design Gym
+   Score: {score} / {totalPossiblePoints}
+   Accuracy: {accuracy}% 
+   
+   Train your eye → {siteUrl}"
+
+Requirements:
+- URL encode the tweet text
+- Use window.open with target _blank
+- Do not require Twitter API authentication
+- Keep implementation simple and readable
+- Show full updated code for the button and handler

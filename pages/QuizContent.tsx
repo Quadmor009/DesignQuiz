@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Head from 'next/head'
 import { questions, foxQuote, Question } from '../data/quizData'
 
@@ -56,6 +56,10 @@ export default function QuizContent() {
   const [showExplanation, setShowExplanation] = useState(false)
   const [showLevelCompleteModal, setShowLevelCompleteModal] = useState(false)
   const [completedLevel, setCompletedLevel] = useState<'beginner' | 'mid' | null>(null)
+  
+  // Scoring state - track points silently during quiz
+  const [score, setScore] = useState(0)
+  const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set())
 
   const currentQuestion = sessionQuestions[currentQuestionIndex]
   const isLastQuestion = currentQuestionIndex === sessionQuestions.length - 1
@@ -69,6 +73,16 @@ export default function QuizContent() {
     if (!showExplanation && currentQuestion) {
       setSelectedAnswer(side)
       setShowExplanation(true)
+      
+      // Track score silently - add 100 points for correct answer (only once per question)
+      const isCorrect = side === currentQuestion.correctAnswer
+      if (isCorrect && !answeredQuestions.has(currentQuestionIndex)) {
+        setScore(prevScore => prevScore + 100)
+        setAnsweredQuestions(prev => new Set(prev).add(currentQuestionIndex))
+      } else if (!isCorrect && !answeredQuestions.has(currentQuestionIndex)) {
+        // Mark question as answered even if incorrect (to prevent double counting)
+        setAnsweredQuestions(prev => new Set(prev).add(currentQuestionIndex))
+      }
     }
   }
 
@@ -93,19 +107,47 @@ export default function QuizContent() {
     setShowExplanation(false)
   }
 
+  // Calculate total possible points and accuracy
+  const totalQuestions = sessionQuestions.length
+  const totalPossiblePoints = totalQuestions * 100
+  const accuracy = totalQuestions > 0 ? Math.round((score / totalPossiblePoints) * 100) : 0
+
   const handleProceedToNextLevel = () => {
     setShowLevelCompleteModal(false)
     setCompletedLevel(null)
     
     if (isLastQuestion) {
-      // Reset to first question if we completed the entire quiz
+      // Reset quiz completely if we completed the entire quiz
       setCurrentQuestionIndex(0)
+      setScore(0)
+      setAnsweredQuestions(new Set())
     } else {
       // Move to next question
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     }
     setSelectedAnswer(null)
     setShowExplanation(false)
+  }
+
+  const handleShareOnTwitter = () => {
+    const siteUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    const tweetText = `Just trained my design instincts at Design Gym
+Score: ${score} / ${totalPossiblePoints}
+Accuracy: ${accuracy}% 
+
+Train your eye → ${siteUrl}`
+    
+    const encodedText = encodeURIComponent(tweetText)
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}`
+    
+    window.open(twitterUrl, '_blank')
+  }
+  
+  // Qualitative feedback based on accuracy
+  const getFeedback = (accuracy: number): string => {
+    if (accuracy >= 80) return 'Strong'
+    if (accuracy >= 50) return 'Solid'
+    return 'Needs practice'
   }
 
   // Only calculate isCorrect if we have both a selected answer and a current question
@@ -137,8 +179,11 @@ export default function QuizContent() {
       <main className="min-h-screen bg-white px-6 py-12 md:px-12 md:py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12 text-center">
-            <div className="text-xl md:text-2xl font-medium text-black mb-8 tracking-normal" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
+            <div className="text-xl md:text-2xl font-medium text-black mb-4 tracking-normal" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif', letterSpacing: '0.02em' }}>
               Design Gym
+            </div>
+            <div className="text-lg font-medium text-black mb-6">
+              Score: {score} / {totalPossiblePoints}
             </div>
             <div className="mb-4">
               <div className="text-sm text-gray-500 mb-2">
@@ -202,7 +247,7 @@ export default function QuizContent() {
               {selectedAnswer === 'left' && (
                 <div className={`p-4 text-center font-medium ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
                   }`}>
-                  {isCorrect ? '✓ Correct' : '✗ Your choice'}
+                  {isCorrect ? '✓ Correct +100 points' : '✗ Your choice'}
                 </div>
               )}
             </div>
@@ -249,7 +294,7 @@ export default function QuizContent() {
               {selectedAnswer === 'right' && (
                 <div className={`p-4 text-center font-medium ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
                   }`}>
-                  {isCorrect ? '✓ Correct' : '✗ Your choice'}
+                  {isCorrect ? '✓ Correct +100 points' : '✗ Your choice'}
                 </div>
               )}
             </div>
@@ -280,22 +325,58 @@ export default function QuizContent() {
       {showLevelCompleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 max-w-md mx-4 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-normal mb-4 text-center">
-              {completedLevel === 'beginner' ? 'Easy Level Complete!' : 'Intermediate Level Complete!'}
-            </h2>
-            <p className="text-gray-700 mb-6 text-center leading-relaxed">
-              {completedLevel === 'beginner' 
-                ? 'Great job completing the beginner level! Ready to move on to the intermediate level?'
-                : 'Congratulations! You\'ve completed all questions. Well done on finishing the entire quiz!'}
-            </p>
-            <div className="text-center">
-              <button
-                onClick={handleProceedToNextLevel}
-                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
-              >
-                {completedLevel === 'beginner' ? 'Continue to Next Level' : 'Start Over'}
-              </button>
-            </div>
+            {completedLevel === 'beginner' ? (
+              <>
+                <h2 className="text-2xl font-normal mb-4 text-center">
+                  Easy Level Complete!
+                </h2>
+                <p className="text-gray-700 mb-6 text-center leading-relaxed">
+                  Great job completing the beginner level! Ready to move on to the intermediate level?
+                </p>
+                <div className="text-center">
+                  <button
+                    onClick={handleProceedToNextLevel}
+                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
+                  >
+                    Continue to Next Level
+                  </button>
+                </div>
+              </>
+            ) : completedLevel === 'mid' ? (
+              <>
+                <h2 className="text-2xl font-normal mb-6 text-center">
+                  Quiz Complete
+                </h2>
+                <div className="mb-6 text-center">
+                  <div className="text-4xl font-normal mb-2 text-gray-900">
+                    {score} / {totalPossiblePoints}
+                  </div>
+                  <div className="text-lg text-gray-600 mb-4">
+                    {accuracy}% accuracy
+                  </div>
+                  <div className="text-base text-gray-700">
+                    {getFeedback(accuracy)}
+                  </div>
+                </div>
+                <div className="text-center space-y-3">
+                  <button
+                    onClick={handleShareOnTwitter}
+                    className="block w-full px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors"
+                  >
+                    Share on Twitter
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleShareOnTwitter()
+                      handleProceedToNextLevel()
+                    }}
+                    className="block w-full px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
+                  >
+                    Share Scores
+                  </button>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       )}
