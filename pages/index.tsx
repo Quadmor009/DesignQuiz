@@ -12,40 +12,28 @@ export default function Home() {
       <main className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-8 py-24 md:px-12 md:py-32">
           {/* Hero Section */}
-          <div className="mb-20 md:mb-32">
+          <div className="mb-20 md:mb-32 text-center">
             <h1 className="text-5xl md:text-7xl font-normal text-black mb-8 tracking-tight">
               Design Gym
             </h1>
           </div>
 
           {/* Value Statement */}
-          <div className="mb-20 md:mb-32">
+          <div className="mb-20 md:mb-32 text-center">
             <p className="text-2xl md:text-3xl text-gray-900 leading-relaxed font-normal">
               A practice platform where designers train their visual judgment.
             </p>
           </div>
 
           {/* Supporting Points */}
-          <div className="mb-20 md:mb-32 space-y-12 md:space-y-16">
-            <div>
-              <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                Compare interfaces, typography, and visual decisions to improve your design instincts.
-              </p>
-            </div>
-            <div>
-              <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                This is not theory or tutorials; it is practice.
-              </p>
-            </div>
-            <div>
-              <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                Build your visual judgment through repetition and comparison.
-              </p>
-            </div>
+          <div className="mb-20 md:mb-32 text-center">
+            <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
+              Compare interfaces, typography, and visual decisions to improve your design instincts.
+            </p>
           </div>
 
           {/* Call to Action */}
-          <div>
+          <div className="text-center">
             <Link
               href="/quiz"
               className="inline-block px-8 py-4 bg-black text-white text-lg font-normal hover:bg-gray-800 transition-colors cursor-pointer"

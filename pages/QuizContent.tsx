@@ -323,10 +323,10 @@ Train your eye → ${siteUrl}`
       <main className="min-h-screen bg-white px-6 py-12 md:px-12 md:py-16">
         {/* Fixed coin counter at top-right */}
         <div className="fixed top-12 right-12 z-10">
-          <div className="text-sm font-medium text-gray-700 border border-gray-300 bg-white px-4 py-2 rounded flex items-center gap-1.5">
+          <div className="text-sm font-medium text-gray-700 border border-gray-300 bg-white px-4 py-2.5 rounded-[12px] flex items-center gap-2 shadow-sm">
             <svg 
               key={`coin-${coins}`}
-              className={`w-4 h-4 ${isCoinAnimating ? 'coin-animate' : ''}`}
+              className={`w-5 h-5 ${isCoinAnimating ? 'coin-animate' : ''}`}
               style={{ transformOrigin: 'center', display: 'inline-block' }}
               viewBox="0 0 24 24" 
               fill="none" 
@@ -336,7 +336,7 @@ Train your eye → ${siteUrl}`
               <circle cx="12" cy="12" r="6" fill="#FCD34D" opacity="0.6"/>
               <path d="M12 8C9.79 8 8 9.79 8 12C8 14.21 9.79 16 12 16C14.21 16 16 14.21 16 12C16 9.79 14.21 8 12 8Z" fill="#F59E0B" opacity="0.3"/>
             </svg>
-            {coins}
+            <span className="font-semibold">{coins}</span>
           </div>
         </div>
         <div className="max-w-6xl mx-auto">
@@ -473,7 +473,7 @@ Train your eye → ${siteUrl}`
             <div className="text-center">
               <button
                 onClick={handleNext}
-                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
+                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
               >
                 {isLastQuestion ? 'Start Over' : 'Next Question'}
               </button>
@@ -485,29 +485,44 @@ Train your eye → ${siteUrl}`
       {/* Instruction Modal - appears over first question */}
       {showInstructionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 max-w-lg mx-4 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-normal mb-6 text-center text-gray-900">
+          <div className="bg-white p-8 max-w-lg mx-4 rounded-[2rem] shadow-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-normal mb-8 text-center text-gray-900">
               How Design Gym Works
             </h2>
             
-            <div className="space-y-6 mb-8">
-              <div>
+            <div className="flex flex-col md:flex-row gap-8 md:gap-6 mb-8 justify-center items-start">
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="mb-3">
+                  <svg className="w-12 h-12 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Choose</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  You'll see two designs. Pick the one that communicates more clearly.
+                <p className="text-gray-700 leading-[20px] text-sm">
+                  Pick the better<br />design.
                 </p>
               </div>
               
-              <div>
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="mb-3">
+                  <svg className="w-12 h-12 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                  </svg>
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Compare</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  After answering, press and hold to compare both designs.
+                <p className="text-gray-700 leading-[20px] text-sm">
+                  Review both designs<br />after answering.
                 </p>
               </div>
               
-              <div>
+              <div className="flex flex-col items-center text-center flex-1">
+                <div className="mb-3">
+                  <svg className="w-12 h-12 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Earn</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-[20px] text-sm">
                   Each correct answer earns 100 coins.
                 </p>
               </div>
@@ -516,7 +531,7 @@ Train your eye → ${siteUrl}`
             <div className="text-center">
               <button
                 onClick={handleStartTraining}
-                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
+                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
               >
                 Start training
               </button>
@@ -528,9 +543,14 @@ Train your eye → ${siteUrl}`
       {/* Level Complete Modal */}
       {showLevelCompleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 max-w-md mx-4 rounded-lg shadow-lg">
+          <div className="bg-white p-8 max-w-md mx-4 rounded-[2rem] shadow-lg">
             {completedLevel === 'beginner' ? (
               <>
+                <div className="flex justify-center mb-4">
+                  <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <h2 className="text-2xl font-normal mb-4 text-center">
                   Beginner Level Complete!
                 </h2>
@@ -540,7 +560,7 @@ Train your eye → ${siteUrl}`
                 <div className="text-center">
                   <button
                     onClick={handleProceedToNextLevel}
-                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
+                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
                   >
                     Continue to Next Level
                   </button>
@@ -548,6 +568,11 @@ Train your eye → ${siteUrl}`
               </>
             ) : completedLevel === 'mid' ? (
               <>
+                <div className="flex justify-center mb-4">
+                  <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <h2 className="text-2xl font-normal mb-4 text-center">
                   Intermediate Level Complete!
                 </h2>
@@ -557,7 +582,7 @@ Train your eye → ${siteUrl}`
                 <div className="text-center">
                   <button
                     onClick={handleProceedToNextLevel}
-                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors"
+                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
                   >
                     Continue to Next Level
                   </button>
@@ -565,6 +590,11 @@ Train your eye → ${siteUrl}`
               </>
             ) : completedLevel === 'expert' ? (
               <>
+                <div className="flex justify-center mb-6">
+                  <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <h2 className="text-2xl font-normal mb-6 text-center">
                   Quiz Complete
                 </h2>
@@ -592,7 +622,7 @@ Train your eye → ${siteUrl}`
                 <div className="flex gap-3">
                   <button
                     onClick={handleShareOnTwitter}
-                    className="w-1/2 px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors whitespace-nowrap flex items-center justify-center gap-2"
+                    className="w-1/2 px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors whitespace-nowrap flex items-center justify-center gap-2 rounded-[12px]"
                   >
                     <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -601,7 +631,7 @@ Train your eye → ${siteUrl}`
                   </button>
                   <button
                     onClick={handleStartOver}
-                    className="w-1/2 px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors whitespace-nowrap"
+                    className="w-1/2 px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors whitespace-nowrap rounded-[12px]"
                   >
                     Start Over
                   </button>
