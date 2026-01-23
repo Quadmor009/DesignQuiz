@@ -19,6 +19,7 @@ export default function Leaderboard() {
   const [filter, setFilter] = useState<FilterLevel>('all')
   const [loading, setLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Get current user ID from sessionStorage if available
@@ -30,13 +31,21 @@ export default function Leaderboard() {
 
   const fetchLeaderboard = async () => {
     setLoading(true)
+    setError(null)
     try {
       const levelParam = filter === 'all' ? 'global' : filter
       const response = await fetch(`/api/leaderboard?level=${levelParam}`)
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch leaderboard: ${response.status} ${response.statusText}`)
+      }
+      
       const data = await response.json()
       setEntries(data)
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load leaderboard')
+      setEntries([])
     } finally {
       setLoading(false)
     }
@@ -106,6 +115,16 @@ export default function Leaderboard() {
             <div className="text-center py-12">
               <p className="text-gray-500">Loading leaderboard...</p>
             </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500 mb-4">{error}</p>
+              <button
+                onClick={fetchLeaderboard}
+                className="px-6 py-2 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-[8px]"
+              >
+                Retry
+              </button>
+            </div>
           ) : entries.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">No entries yet. Be the first!</p>
@@ -133,11 +152,14 @@ export default function Leaderboard() {
                     {entries.map((entry, index) => {
                       const rank = index + 1
                       const isCurrentUser = entry.id === currentUserId
+                      const isFirstPlace = rank === 1
                       return (
                         <tr
                           key={entry.id}
                           className={`transition-colors ${
                             isCurrentUser
+                              ? 'bg-yellow-50 border-l-4 border-yellow-400'
+                              : isFirstPlace
                               ? 'bg-yellow-50 border-l-4 border-yellow-400'
                               : 'hover:bg-gray-50'
                           }`}

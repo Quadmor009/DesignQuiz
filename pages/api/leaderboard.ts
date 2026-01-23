@@ -71,14 +71,15 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === 'GET') {
-    const { level = 'all' } = req.query
-    const entries = readLeaderboard()
-    const filtered = filterByLevel(entries, level as string)
-    const sorted = sortEntries(filtered)
-    
-    res.status(200).json(sorted)
-  } else if (req.method === 'POST') {
+  try {
+    if (req.method === 'GET') {
+      const { level = 'all' } = req.query
+      const entries = readLeaderboard()
+      const filtered = filterByLevel(entries, level as string)
+      const sorted = sortEntries(filtered)
+      
+      res.status(200).json(sorted)
+    } else if (req.method === 'POST') {
     const entry: LeaderboardEntry = req.body
     
     // Validate entry
@@ -99,10 +100,14 @@ export default function handler(
     // Write back
     writeLeaderboard(entries)
     
-    res.status(201).json(entry)
-  } else {
-    res.setHeader('Allow', ['GET', 'POST'])
-    res.status(405).json({ error: 'Method not allowed' })
+      res.status(201).json(entry)
+    } else {
+      res.setHeader('Allow', ['GET', 'POST'])
+      res.status(405).json({ error: 'Method not allowed' })
+    }
+  } catch (error) {
+    console.error('Leaderboard API error:', error)
+    res.status(500).json({ error: 'Internal server error' })
   }
 }
 

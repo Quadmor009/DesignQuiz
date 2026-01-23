@@ -398,7 +398,7 @@ Train your eye → ${siteUrl}`
       <main className="min-h-screen bg-white px-6 py-12 md:px-12 md:py-16">
         {/* Fixed coin counter at top-right */}
         <div className="fixed top-12 right-12 z-10">
-          <div className="text-sm font-medium text-gray-700 border border-gray-300 bg-white px-4 py-2.5 rounded-[8px] flex items-center gap-2 shadow-sm">
+          <div className="flex items-center justify-center gap-2 border-2 border-amber-200 rounded-[12px] px-4 py-2.5 bg-gradient-to-br from-amber-50 to-yellow-50">
             <svg 
               key={`coin-${coins}`}
               className={`w-5 h-5 ${isCoinAnimating ? 'coin-animate' : ''}`}
@@ -411,7 +411,7 @@ Train your eye → ${siteUrl}`
               <circle cx="12" cy="12" r="6" fill="#FCD34D" opacity="0.6"/>
               <path d="M12 8C9.79 8 8 9.79 8 12C8 14.21 9.79 16 12 16C14.21 16 16 14.21 16 12C16 9.79 14.21 8 12 8Z" fill="#F59E0B" opacity="0.3"/>
             </svg>
-            <span className="font-semibold">{coins}</span>
+            <span className="text-sm font-semibold text-amber-900">{coins}</span>
           </div>
         </div>
         <div className="max-w-6xl mx-auto">
@@ -666,17 +666,19 @@ Train your eye → ${siteUrl}`
             ) : completedLevel === 'expert' ? (
               <>
                 <div className="flex justify-center mb-6">
-                  <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <img 
+                    src="/Icons/Brain%20icon%20copy.png" 
+                    alt="Brain icon" 
+                    className="w-16 h-16 object-contain"
+                  />
                 </div>
                 <h2 className="text-2xl font-normal mb-6 text-center">
                   Session Complete
                 </h2>
                 <div className="mb-6">
-                  <div className="text-base text-gray-700 mb-4 flex items-center justify-center gap-2">
+                  <div className="mb-4 flex items-center justify-center gap-3 border-2 border-amber-200 rounded-[12px] px-6 py-4 bg-gradient-to-br from-amber-50 to-yellow-50 w-fit mx-auto">
                     <svg 
-                      className="w-5 h-5"
+                      className="w-7 h-7 coin-animate-loop coin-glow"
                       viewBox="0 0 24 24" 
                       fill="none" 
                       xmlns="http://www.w3.org/2000/svg"
@@ -685,7 +687,10 @@ Train your eye → ${siteUrl}`
                       <circle cx="12" cy="12" r="6" fill="#FCD34D" opacity="0.6"/>
                       <path d="M12 8C9.79 8 8 9.79 8 12C8 14.21 9.79 16 12 16C14.21 16 16 14.21 16 12C16 9.79 14.21 8 12 8Z" fill="#F59E0B" opacity="0.3"/>
                     </svg>
-                    <span className="text-center">Coins: {coins}</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-medium text-amber-700 uppercase tracking-wide">Coins Earned</span>
+                      <span className="text-2xl font-bold text-amber-900">{coins}</span>
+                    </div>
                   </div>
                   <div className={`text-2xl font-medium mb-2 text-center ${getAccuracyColor(accuracy)}`}>
                     Accuracy: {accuracy}%
