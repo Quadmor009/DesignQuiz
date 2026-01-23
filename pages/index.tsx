@@ -33,13 +33,21 @@ export default function Home() {
           </div>
 
           {/* Call to Action */}
-          <div className="text-center">
+          <div className="text-center space-y-4">
             <Link
               href="/quiz"
-              className="inline-block px-8 py-4 bg-black text-white text-lg font-normal hover:bg-gray-800 transition-colors cursor-pointer"
+              className="inline-block px-8 py-4 bg-black text-white text-lg font-normal hover:bg-gray-800 transition-colors cursor-pointer rounded-[8px]"
             >
               Start your Training
             </Link>
+            <div>
+              <Link
+                href="/leaderboard"
+                className="inline-block px-8 py-4 bg-gray-100 text-gray-900 text-lg font-normal hover:bg-gray-200 transition-colors cursor-pointer rounded-[8px]"
+              >
+                View Leaderboard
+              </Link>
+            </div>
           </div>
         </div>
       </main>

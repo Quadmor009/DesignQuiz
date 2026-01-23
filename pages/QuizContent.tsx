@@ -144,11 +144,20 @@ export default function QuizContent() {
   const [showLevelCompleteModal, setShowLevelCompleteModal] = useState(false)
   const [completedLevel, setCompletedLevel] = useState<'beginner' | 'mid' | 'expert' | null>(null)
   const [showInstructionModal, setShowInstructionModal] = useState(true)
+  const [showNameInputModal, setShowNameInputModal] = useState(false)
   
-  // Coin state - track coins silently during quiz
+  // Coin state - track coins silently during session
   const [coins, setCoins] = useState(0)
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set())
   const [isCoinAnimating, setIsCoinAnimating] = useState(false)
+  
+  // Time tracking
+  const [startTime, setStartTime] = useState<number | null>(null)
+  const [endTime, setEndTime] = useState<number | null>(null)
+  
+  // Player name
+  const [playerName, setPlayerName] = useState('')
+  const [submittingLeaderboard, setSubmittingLeaderboard] = useState(false)
 
   const currentQuestion = sessionQuestions[currentQuestionIndex]
   
@@ -189,6 +198,15 @@ export default function QuizContent() {
         // Mark question as answered even if incorrect (to prevent double counting)
         setAnsweredQuestions(prev => new Set(prev).add(currentQuestionIndex))
       }
+      
+      // If this is the last question, automatically show the completion modal
+      if (isLastQuestion) {
+        setTimeout(() => {
+          setCompletedLevel('expert')
+          setEndTime(Date.now())
+          setShowLevelCompleteModal(true)
+        }, 500) // Small delay to show the explanation first
+      }
     }
   }
 
@@ -212,6 +230,7 @@ export default function QuizContent() {
     // Check if we just completed the last question (expert level complete)
     if (isLastQuestion) {
       setCompletedLevel('expert')
+      setEndTime(Date.now())
       setShowLevelCompleteModal(true)
       return
     }
@@ -232,7 +251,7 @@ export default function QuizContent() {
     setCompletedLevel(null)
     
     if (isLastQuestion) {
-      // Reset quiz completely if we completed the entire quiz
+      // Reset session completely if we completed the entire session
       setCurrentQuestionIndex(0)
       setCoins(0)
       setAnsweredQuestions(new Set())
@@ -256,6 +275,62 @@ export default function QuizContent() {
 
   const handleStartTraining = () => {
     setShowInstructionModal(false)
+    setShowNameInputModal(true)
+  }
+
+  const handleNameSubmit = () => {
+    if (playerName.trim()) {
+      setShowNameInputModal(false)
+      setStartTime(Date.now())
+    }
+  }
+
+  // Auto-submit to leaderboard when session completes
+  useEffect(() => {
+    if (completedLevel === 'expert' && startTime && playerName.trim() && !endTime) {
+      const finalEndTime = Date.now()
+      setEndTime(finalEndTime)
+      
+      // Submit to leaderboard
+      const submitEntry = async () => {
+        setSubmittingLeaderboard(true)
+        try {
+          const timeTaken = Math.floor((finalEndTime - startTime) / 1000)
+          const level = 'all'
+          
+          const response = await fetch('/api/leaderboard', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: playerName.trim(),
+              score: coins,
+              accuracy: accuracy,
+              timeTaken: timeTaken,
+              level: level,
+            }),
+          })
+          
+          if (response.ok) {
+            const entry = await response.json()
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('lastLeaderboardEntryId', entry.id)
+            }
+          }
+        } catch (error) {
+          console.error('Error submitting to leaderboard:', error)
+        } finally {
+          setSubmittingLeaderboard(false)
+        }
+      }
+      
+      submitEntry()
+    }
+  }, [completedLevel, startTime, playerName, coins, accuracy, endTime])
+
+  const handleViewLeaderboard = () => {
+    window.location.href = '/leaderboard'
   }
 
   const handleShareOnTwitter = () => {
@@ -323,7 +398,7 @@ Train your eye → ${siteUrl}`
       <main className="min-h-screen bg-white px-6 py-12 md:px-12 md:py-16">
         {/* Fixed coin counter at top-right */}
         <div className="fixed top-12 right-12 z-10">
-          <div className="text-sm font-medium text-gray-700 border border-gray-300 bg-white px-4 py-2.5 rounded-[12px] flex items-center gap-2 shadow-sm">
+          <div className="text-sm font-medium text-gray-700 border border-gray-300 bg-white px-4 py-2.5 rounded-[8px] flex items-center gap-2 shadow-sm">
             <svg 
               key={`coin-${coins}`}
               className={`w-5 h-5 ${isCoinAnimating ? 'coin-animate' : ''}`}
@@ -469,13 +544,13 @@ Train your eye → ${siteUrl}`
             </div>
           )}
 
-          {showExplanation && (
+          {showExplanation && !isLastQuestion && (
             <div className="text-center">
               <button
                 onClick={handleNext}
-                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
+                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[8px]"
               >
-                {isLastQuestion ? 'Start Over' : 'Next Question'}
+                Next Question
               </button>
             </div>
           )}
@@ -531,7 +606,7 @@ Train your eye → ${siteUrl}`
             <div className="text-center">
               <button
                 onClick={handleStartTraining}
-                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
+                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[8px]"
               >
                 Start training
               </button>
@@ -560,7 +635,7 @@ Train your eye → ${siteUrl}`
                 <div className="text-center">
                   <button
                     onClick={handleProceedToNextLevel}
-                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
+                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[8px]"
                   >
                     Continue to Next Level
                   </button>
@@ -582,7 +657,7 @@ Train your eye → ${siteUrl}`
                 <div className="text-center">
                   <button
                     onClick={handleProceedToNextLevel}
-                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[12px]"
+                    className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[8px]"
                   >
                     Continue to Next Level
                   </button>
@@ -596,9 +671,9 @@ Train your eye → ${siteUrl}`
                   </svg>
                 </div>
                 <h2 className="text-2xl font-normal mb-6 text-center">
-                  Quiz Complete
+                  Session Complete
                 </h2>
-                <div className="mb-6 text-center">
+                <div className="mb-6">
                   <div className="text-base text-gray-700 mb-4 flex items-center justify-center gap-2">
                     <svg 
                       className="w-5 h-5"
@@ -610,34 +685,81 @@ Train your eye → ${siteUrl}`
                       <circle cx="12" cy="12" r="6" fill="#FCD34D" opacity="0.6"/>
                       <path d="M12 8C9.79 8 8 9.79 8 12C8 14.21 9.79 16 12 16C14.21 16 16 14.21 16 12C16 9.79 14.21 8 12 8Z" fill="#F59E0B" opacity="0.3"/>
                     </svg>
-                    <span>Coins: {coins}</span>
+                    <span className="text-center">Coins: {coins}</span>
                   </div>
-                  <div className={`text-2xl font-medium mb-2 ${getAccuracyColor(accuracy)}`}>
+                  <div className={`text-2xl font-medium mb-2 text-center ${getAccuracyColor(accuracy)}`}>
                     Accuracy: {accuracy}%
                   </div>
-                  <div className="text-base text-gray-700">
+                  <div className="text-base text-gray-700 text-center">
                     {getFeedback(accuracy)}
                   </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 mb-4">
+                  <button
+                    onClick={handleViewLeaderboard}
+                    className="w-1/2 px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors whitespace-nowrap rounded-[8px]"
+                  >
+                    View Leaderboard
+                  </button>
                   <button
                     onClick={handleShareOnTwitter}
-                    className="w-1/2 px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors whitespace-nowrap flex items-center justify-center gap-2 rounded-[12px]"
+                    className="w-1/2 px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors whitespace-nowrap flex items-center justify-center gap-2 rounded-[8px]"
                   >
                     <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
                     Share on X
                   </button>
+                </div>
+                <div className="text-center pt-4 border-t border-gray-200">
                   <button
                     onClick={handleStartOver}
-                    className="w-1/2 px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors whitespace-nowrap rounded-[12px]"
+                    className="text-base font-medium text-gray-900 hover:text-black transition-colors underline decoration-2 underline-offset-4 hover:decoration-gray-400"
                   >
                     Start Over
                   </button>
                 </div>
               </>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Name Input Modal - appears before session starts */}
+      {showNameInputModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 max-w-md mx-4 rounded-[2rem] shadow-lg">
+            <h2 className="text-2xl font-normal mb-4 text-center text-gray-900">
+              Enter Your Name
+            </h2>
+            <p className="text-gray-600 mb-6 text-center text-sm">
+              Your name will appear on the leaderboard
+            </p>
+            <div className="mb-6">
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                placeholder="Your name"
+                maxLength={20}
+                className="w-full px-4 py-3 border border-gray-300 rounded-[8px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && playerName.trim()) {
+                    handleNameSubmit()
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+            <div className="text-center">
+              <button
+                onClick={handleNameSubmit}
+                disabled={!playerName.trim()}
+                className="px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors rounded-[8px] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Start Training
+              </button>
+            </div>
           </div>
         </div>
       )}
