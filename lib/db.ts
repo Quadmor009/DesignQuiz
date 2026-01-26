@@ -16,10 +16,11 @@ export function getDbPool(): Pool {
     // This prevents Next.js from crashing during module import
     const error = new Error(
       'DATABASE_URL environment variable is not set. ' +
-      'Please set it in your .env.local file or Render environment variables. ' +
-      'Make sure to restart your dev server after creating .env.local'
+      'Please set it in your .env.local file (for local) or deployment platform environment variables (for production). ' +
+      'Make sure to restart your dev server after creating .env.local, or redeploy after adding the environment variable.'
     )
     console.error(error.message)
+    console.error('Current NODE_ENV:', process.env.NODE_ENV)
     throw error
   }
 

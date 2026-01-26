@@ -11,16 +11,16 @@
 - ✅ Uses Tailwind CSS
 - ✅ Has proper project structure
 
-### ⚠️ Important Note About Leaderboard
+### ✅ Leaderboard Database Setup
 
-Your leaderboard currently saves data to a JSON file (`data/leaderboard.json`). 
-**This will NOT work on Vercel** because Vercel's file system is read-only in production.
+Your leaderboard now uses PostgreSQL (Render database). **You must add the database connection string to Vercel environment variables** for it to work in production.
 
-**What will happen:**
-- ✅ Reading leaderboard data will work
-- ❌ Writing/saving new scores will fail silently
+**Required Setup:**
+1. Add `DATABASE_URL` environment variable in Vercel (see below)
+2. The database migration has already been run
+3. Leaderboard will work once the environment variable is set
 
-**Future fix needed:** You'll need to migrate to a database (like Vercel Postgres, MongoDB, or Supabase) for the leaderboard to work fully. For now, the app will deploy but new scores won't save.
+**See [PRODUCTION_SETUP.md](./PRODUCTION_SETUP.md) for detailed instructions.**
 
 ---
 
@@ -92,9 +92,20 @@ git push -u origin main
 3. Click "Add New Project"
 4. Import your GitHub repository (it should appear in the list)
 5. Vercel will automatically detect it's a Next.js project
-6. Click "Deploy" (you don't need to change any settings)
-7. Wait 2-3 minutes for deployment to complete
-8. Your site will be live at a URL like: `https://your-project-name.vercel.app`
+
+6. **IMPORTANT: Add Environment Variable**
+   - Before clicking "Deploy", click "Environment Variables"
+   - Add a new variable:
+     - **Key**: `DATABASE_URL`
+     - **Value**: Your Render PostgreSQL **External Database URL**
+     - Select all environments (Production, Preview, Development)
+   - Click "Add"
+
+7. Click "Deploy"
+8. Wait 2-3 minutes for deployment to complete
+9. Your site will be live at a URL like: `https://your-project-name.vercel.app`
+
+**Note:** If you already deployed without the environment variable, see [PRODUCTION_SETUP.md](./PRODUCTION_SETUP.md) to add it now.
 
 ---
 
