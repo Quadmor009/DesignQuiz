@@ -16,12 +16,14 @@ export default async function handler(
     }
 
     // Get unique Twitter handles from leaderboard (only those that have handles)
+    // Get unique handles ordered by most recent
     const sql = `
-      SELECT DISTINCT twitter_handle
+      SELECT DISTINCT twitter_handle, MAX(created_at) as latest_created
       FROM leaderboard
       WHERE twitter_handle IS NOT NULL 
         AND twitter_handle != ''
-      ORDER BY created_at DESC
+      GROUP BY twitter_handle
+      ORDER BY latest_created DESC
       LIMIT 20
     `
 
