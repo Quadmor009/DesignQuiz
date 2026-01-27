@@ -10,6 +10,7 @@ interface LeaderboardEntry {
   timeTaken: number
   level: 'beginner' | 'mid' | 'expert' | 'all'
   timestamp: number
+  twitterHandle?: string | null
 }
 
 type FilterLevel = 'all' | 'beginner' | 'mid' | 'expert'
@@ -170,8 +171,19 @@ export default function Leaderboard() {
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-medium text-gray-900">{entry.name}</span>
+                              {entry.twitterHandle && (
+                                <a
+                                  href={`https://twitter.com/${entry.twitterHandle.replace('@', '')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-500 hover:text-blue-600 font-medium"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {entry.twitterHandle}
+                                </a>
+                              )}
                               {isCurrentUser && (
                                 <span className="text-xs px-2 py-0.5 bg-yellow-400 text-yellow-900 rounded-full font-medium">
                                   You

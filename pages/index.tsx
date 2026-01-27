@@ -20,33 +20,46 @@ const PARTNER_LOGOS = [
   { name: 'Partner 5', url: 'https://via.placeholder.com/100x40?text=Logo5' },
 ]
 
-// Dummy Twitter handles of people who have played
-const PLAYER_HANDLES = [
-  '@sarah_designs',
-  '@mike_ux',
-  '@jess_creative',
-  '@alex_visual',
-  '@emma_ui',
-  '@david_design',
-  '@lisa_creative',
-  '@tom_uxpro',
-  '@anna_designer',
-  '@chris_visual',
-  '@maya_ui',
-  '@ryan_creative',
-]
-
 export default function Home() {
   const [handleIndex, setHandleIndex] = useState(0)
+  const [playerHandles, setPlayerHandles] = useState<string[]>([])
+  const [loadingHandles, setLoadingHandles] = useState(true)
+
+  // Fetch real Twitter handles from database
+  useEffect(() => {
+    const fetchHandles = async () => {
+      try {
+        const response = await fetch('/api/twitter-handles')
+        if (response.ok) {
+          const handles = await response.json()
+          // Only use real handles from database, no fallback
+          setPlayerHandles(handles)
+        } else {
+          // No fallback - just empty array
+          setPlayerHandles([])
+        }
+      } catch (error) {
+        console.error('Error fetching Twitter handles:', error)
+        // No fallback - just empty array
+        setPlayerHandles([])
+      } finally {
+        setLoadingHandles(false)
+      }
+    }
+
+    fetchHandles()
+  }, [])
 
   // Handle scrolling Twitter handles
   useEffect(() => {
+    if (playerHandles.length === 0) return
+    
     const interval = setInterval(() => {
-      setHandleIndex((prev) => (prev + 1) % PLAYER_HANDLES.length)
+      setHandleIndex((prev) => (prev + 1) % playerHandles.length)
     }, 2000) // Change handle every 2 seconds
 
     return () => clearInterval(interval)
-  }, [])
+  }, [playerHandles])
 
   // Duplicate images for seamless scrolling - enough duplicates to hide start/end points
   // With 6 sets, each set is ~16.67% of total height, so we animate through one set
@@ -70,20 +83,26 @@ export default function Home() {
                 110+ designers already training
               </p>
               <div className="relative h-5 w-full max-w-md overflow-hidden">
-                <div className="absolute inset-0 flex flex-col">
-                  {PLAYER_HANDLES.map((handle, index) => (
-                    <span
-                      key={index}
-                      className="text-xs text-gray-500 font-normal whitespace-nowrap w-full text-left transition-all duration-500 ease-in-out absolute"
-                      style={{
-                        transform: `translateY(${(index - handleIndex) * 100}%)`,
-                        opacity: Math.abs(index - handleIndex) <= 1 ? 1 : 0,
-                      }}
-                    >
-                      {handle}
-                    </span>
-                  ))}
-                </div>
+                {loadingHandles ? (
+                  <span className="text-xs text-gray-400 font-normal">Loading...</span>
+                ) : playerHandles.length > 0 ? (
+                  <div className="absolute inset-0 flex flex-col">
+                    {playerHandles.map((handle, index) => (
+                      <span
+                        key={index}
+                        className="text-xs text-gray-500 font-normal whitespace-nowrap w-full text-left transition-all duration-500 ease-in-out absolute"
+                        style={{
+                          transform: `translateY(${(index - handleIndex) * 100}%)`,
+                          opacity: Math.abs(index - handleIndex) <= 1 ? 1 : 0,
+                        }}
+                      >
+                        {handle}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-400 font-normal">Be the first to connect your Twitter!</span>
+                )}
               </div>
             </div>
           </div>

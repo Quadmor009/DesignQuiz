@@ -157,6 +157,7 @@ export default function QuizContent() {
   
   // Player name
   const [playerName, setPlayerName] = useState('')
+  const [twitterHandle, setTwitterHandle] = useState('')
   const [submittingLeaderboard, setSubmittingLeaderboard] = useState(false)
   
   // Share tone toggle
@@ -330,6 +331,7 @@ export default function QuizContent() {
             accuracy: accuracy,
             timeTaken: timeTaken,
             level: level,
+            twitterHandle: twitterHandle.trim() || null,
           }
           
           console.log('📤 Submitting to leaderboard:', submissionData)
@@ -850,12 +852,15 @@ ${siteUrl}`
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 sm:p-8 max-w-md w-full mx-4 rounded-[2rem] shadow-lg">
             <h2 className="text-xl sm:text-2xl font-normal mb-4 text-center text-gray-900">
-              Enter Your Name
+              Connect Your Account
             </h2>
             <p className="text-gray-600 mb-6 text-center text-xs sm:text-sm">
               Your name will appear on the leaderboard
             </p>
-            <div className="mb-6">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Name *
+              </label>
               <input
                 type="text"
                 value={playerName}
@@ -870,6 +875,34 @@ ${siteUrl}`
                 }}
                 autoFocus
               />
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Twitter Handle (Optional)
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm sm:text-base pointer-events-none">@</span>
+                <input
+                  type="text"
+                  value={twitterHandle}
+                  onChange={(e) => {
+                    // Remove @ if user types it (we show it as a prefix)
+                    const value = e.target.value.replace('@', '')
+                    setTwitterHandle(value)
+                  }}
+                  placeholder="yourhandle"
+                  maxLength={15}
+                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-[8px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-sm sm:text-base"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && playerName.trim()) {
+                      handleNameSubmit()
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Connect your Twitter to appear in social proof
+              </p>
             </div>
             <div className="text-center">
               <button

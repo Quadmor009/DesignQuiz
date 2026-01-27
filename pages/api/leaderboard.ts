@@ -9,6 +9,7 @@ export interface LeaderboardEntry {
   timeTaken: number // in seconds
   level: 'beginner' | 'mid' | 'expert' | 'all'
   timestamp: number
+  twitterHandle?: string | null
 }
 
 export default async function handler(
@@ -69,14 +70,14 @@ export default async function handler(
       if (level === 'all' || level === 'global') {
         // Get all entries, sorted by score DESC, accuracy DESC, time_taken ASC
         sql = `
-          SELECT id, name, score, accuracy, time_taken as "timeTaken", level, timestamp
+          SELECT id, name, score, accuracy, time_taken as "timeTaken", level, timestamp, twitter_handle as "twitterHandle"
           FROM leaderboard
           ORDER BY score DESC, accuracy DESC, time_taken ASC
         `
       } else {
         // Filter by level
         sql = `
-          SELECT id, name, score, accuracy, time_taken as "timeTaken", level, timestamp
+          SELECT id, name, score, accuracy, time_taken as "timeTaken", level, timestamp, twitter_handle as "twitterHandle"
           FROM leaderboard
           WHERE level = $1
           ORDER BY score DESC, accuracy DESC, time_taken ASC
@@ -108,10 +109,17 @@ export default async function handler(
       
       // Insert into database
       const insertSQL = `
-        INSERT INTO leaderboard (id, name, score, accuracy, time_taken, level, timestamp)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id, name, score, accuracy, time_taken as "timeTaken", level, timestamp
+        INSERT INTO leaderboard (id, name, score, accuracy, time_taken, level, timestamp, twitter_handle)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, name, score, accuracy, time_taken as "timeTaken", level, timestamp, twitter_handle as "twitterHandle"
       `
+      
+      // Normalize Twitter handle (remove @ if present, add it back)
+      const twitterHandle = entry.twitterHandle 
+        ? entry.twitterHandle.startsWith('@') 
+          ? entry.twitterHandle 
+          : `@${entry.twitterHandle}`
+        : null
       
       const result = await query(insertSQL, [
         id,
@@ -120,7 +128,8 @@ export default async function handler(
         entry.accuracy,
         entry.timeTaken,
         entry.level,
-        timestamp
+        timestamp,
+        twitterHandle
       ])
       
       const newEntry: LeaderboardEntry = result.rows[0]
