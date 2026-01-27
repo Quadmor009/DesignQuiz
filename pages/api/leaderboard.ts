@@ -29,10 +29,19 @@ export default async function handler(
     if (!process.env.DATABASE_URL) {
       console.error('DATABASE_URL is not set')
       console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('DATABASE')))
+      
+      // Add debug info in response for easier troubleshooting
+      const debugInfo = req.query.debug === 'true' ? {
+        nodeEnv: process.env.NODE_ENV,
+        availableEnvVars: Object.keys(process.env).filter(k => k.includes('DATABASE') || k.includes('VERCEL')),
+        timestamp: new Date().toISOString()
+      } : {}
+      
       return res.status(503).json({ 
         error: 'Database not configured',
         message: 'DATABASE_URL environment variable is missing. Please add it in your deployment platform (Vercel/Render) environment variables and redeploy.',
-        hint: 'Make sure to redeploy after adding the environment variable'
+        hint: 'Make sure to redeploy after adding the environment variable',
+        ...debugInfo
       })
     }
     
@@ -40,7 +49,19 @@ export default async function handler(
     console.log('DATABASE_URL is set, length:', process.env.DATABASE_URL.length)
 
     if (req.method === 'GET') {
-      const { level = 'all' } = req.query
+      const { level = 'all', debug } = req.query
+      
+      // If debug mode, return diagnostic info
+      if (debug === 'true') {
+        return res.status(200).json({
+          success: true,
+          databaseConfigured: true,
+          databaseUrlLength: process.env.DATABASE_URL?.length || 0,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: new Date().toISOString(),
+          message: 'Database is configured. Attempting to fetch leaderboard...'
+        })
+      }
       
       let sql: string
       let params: any[] = []
