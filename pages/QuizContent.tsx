@@ -398,6 +398,14 @@ export default function QuizContent() {
     window.location.href = '/leaderboard'
   }
 
+  const handleViewStats = () => {
+    // Navigate to stats page with user identifier
+    const identifier = twitterHandle.trim() 
+      ? `?twitter=${twitterHandle.replace('@', '')}`
+      : `?name=${encodeURIComponent(playerName.trim())}`
+    window.location.href = `/stats${identifier}`
+  }
+
   const handleShareOnTwitter = () => {
     const siteUrl = typeof window !== 'undefined' ? window.location.origin : ''
     
@@ -818,14 +826,22 @@ ${siteUrl}`
                 
                 <div className="flex flex-col sm:flex-row gap-3 mb-4">
                   <button
-                    onClick={handleViewLeaderboard}
+                    onClick={handleViewStats}
                     className="w-full sm:w-1/2 px-6 sm:px-8 py-3 bg-black text-white font-normal hover:bg-gray-800 transition-colors whitespace-nowrap rounded-[8px] text-sm sm:text-base"
+                  >
+                    View Your Stats
+                  </button>
+                  <button
+                    onClick={handleViewLeaderboard}
+                    className="w-full sm:w-1/2 px-6 sm:px-8 py-3 bg-gray-100 text-gray-900 font-normal hover:bg-gray-200 transition-colors whitespace-nowrap rounded-[8px] text-sm sm:text-base"
                   >
                     View Leaderboard
                   </button>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 mb-4">
                   <button
                     onClick={handleShareOnTwitter}
-                    className="w-full sm:w-1/2 px-6 sm:px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors whitespace-nowrap flex items-center justify-center gap-2 rounded-[8px] text-sm sm:text-base"
+                    className="w-full px-6 sm:px-8 py-3 bg-blue-500 text-white font-normal hover:bg-blue-600 transition-colors whitespace-nowrap flex items-center justify-center gap-2 rounded-[8px] text-sm sm:text-base"
                   >
                     <svg className="w-5 h-5 sm:w-7 sm:h-7 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>

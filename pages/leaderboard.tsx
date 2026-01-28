@@ -13,11 +13,8 @@ interface LeaderboardEntry {
   twitterHandle?: string | null
 }
 
-type FilterLevel = 'all' | 'beginner' | 'mid' | 'expert'
-
 export default function Leaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
-  const [filter, setFilter] = useState<FilterLevel>('all')
   const [loading, setLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -28,14 +25,13 @@ export default function Leaderboard() {
     setCurrentUserId(userId)
     
     fetchLeaderboard()
-  }, [filter])
+  }, [])
 
   const fetchLeaderboard = async () => {
     setLoading(true)
     setError(null)
     try {
-      const levelParam = filter === 'all' ? 'global' : filter
-      const response = await fetch(`/api/leaderboard?level=${levelParam}`)
+      const response = await fetch(`/api/leaderboard?level=global`)
       
       if (!response.ok) {
         throw new Error(`Failed to fetch leaderboard: ${response.status} ${response.statusText}`)
@@ -56,15 +52,6 @@ export default function Leaderboard() {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const getLevelLabel = (level: string): string => {
-    switch (level) {
-      case 'beginner': return 'Beginner'
-      case 'mid': return 'Intermediate'
-      case 'expert': return 'Expert'
-      default: return 'All Levels'
-    }
   }
 
   const getRankColor = (rank: number): string => {
@@ -92,23 +79,6 @@ export default function Leaderboard() {
             <p className="text-gray-600 text-lg">
               See how you stack up against other designers
             </p>
-          </div>
-
-          {/* Filter Buttons */}
-          <div className="flex flex-wrap gap-3 justify-center mb-8">
-            {(['all', 'beginner', 'mid', 'expert'] as FilterLevel[]).map((level) => (
-              <button
-                key={level}
-                onClick={() => setFilter(level)}
-                className={`px-6 py-2 rounded-[8px] font-medium transition-colors ${
-                  filter === level
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {getLevelLabel(level)}
-              </button>
-            ))}
           </div>
 
           {/* Leaderboard Table */}
@@ -172,7 +142,16 @@ export default function Leaderboard() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium text-gray-900">{entry.name}</span>
+                              {isCurrentUser ? (
+                                <a
+                                  href={`/stats?name=${encodeURIComponent(entry.name)}`}
+                                  className="font-medium text-gray-900 hover:text-black underline"
+                                >
+                                  {entry.name}
+                                </a>
+                              ) : (
+                                <span className="font-medium text-gray-900">{entry.name}</span>
+                              )}
                               {entry.twitterHandle && (
                                 <a
                                   href={`https://twitter.com/${entry.twitterHandle.replace('@', '')}`}
